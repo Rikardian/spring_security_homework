@@ -46,7 +46,6 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
         TokensPair tokensPair = new TokensPair();
         tokensPair.setAccessToken(jwtProvider.createToken(authResult).replace(BEARER_PREFIX, ""));
         tokensPair.setRefreshToken(jwtProvider.createRefreshToken(authResult).replace(BEARER_PREFIX, ""));
-        response.addHeader(HttpHeaders.AUTHORIZATION, jwtProvider.createToken(authResult));
         response.setContentType("text/json");
         String jsonToken =new ObjectMapper().writeValueAsString(tokensPair);
         PrintWriter writer = response.getWriter();
