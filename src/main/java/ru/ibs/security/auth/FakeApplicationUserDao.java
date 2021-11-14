@@ -56,7 +56,7 @@ public class FakeApplicationUserDao implements ApplicationUserDao {
                 ),
                 new ApplicationUser(
                         "Boris",
-                        passwordEncoder.encode("password404"),
+                        passwordEncoder.encode("password"),
                         SCRUM_MASTER.getAuthorities(),
                         true,
                         true,
