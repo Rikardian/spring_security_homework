@@ -22,12 +22,11 @@ public class TokenController {
 
 
     @Autowired
-    TokensPair tokensPair;
     JwtProvider jwtProvider;
 
     @GetMapping("/token")
     public TokensPair refreshTokens(Authentication authentication, HttpServletResponse response) throws IOException {
-
+        TokensPair tokensPair = new TokensPair();
         tokensPair.setAccessToken(jwtProvider.createToken(authentication).replace(BEARER_PREFIX, ""));
         tokensPair.setRefreshToken(jwtProvider.createRefreshToken(authentication).replace(BEARER_PREFIX, ""));
         response.addHeader(HttpHeaders.AUTHORIZATION, tokensPair.getAccessToken());
