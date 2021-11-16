@@ -2,11 +2,17 @@ package ru.ibs.security.auth;
 
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.ibs.security.config.ApplicationUserRole;
+import ru.ibs.security.entities.UserEntity;
+import ru.ibs.security.service.UserService;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static ru.ibs.security.config.ApplicationUserRole.*;
 
@@ -14,7 +20,18 @@ import static ru.ibs.security.config.ApplicationUserRole.*;
 @Service("fake")
 public class FakeApplicationUserDao implements ApplicationUserDao {
 
+    @Autowired
+    UserService userService;
+
     private final PasswordEncoder passwordEncoder;
+
+    @PostConstruct
+    private void postConstruct() {
+        userService.createUser("oliver", "password", "EMPLOYEE");
+        userService.createUser("henry", "password123", "MANAGER");
+        userService.createUser("emma", "password123", "TRAINEE");
+        userService.createUser("Boris", "password", "SCRUM_MASTER");
+    }
 
     @Override
     public Optional<ApplicationUser> selectUserFromDbByUserName(String username) {
@@ -26,44 +43,22 @@ public class FakeApplicationUserDao implements ApplicationUserDao {
 
 
     private List<ApplicationUser> getApplicationUsers() {
-        return Lists.newArrayList(
-                new ApplicationUser(
-                        "oliver",
-                        passwordEncoder.encode("password"),
-                        EMPLOYEE.getAuthorities(),
-                        true,
-                        true,
-                        true,
-                        true
-                ),
-                new ApplicationUser(
-                        "henry",
-                        passwordEncoder.encode("password123"),
-                        MANAGER.getAuthorities(),
-                        true,
-                        true,
-                        true,
-                        true
-                ),
-                new ApplicationUser(
-                        "emma",
-                        passwordEncoder.encode("password123"),
-                        TRAINEE.getAuthorities(),
-                        true,
-                        true,
-                        true,
-                        true
-                ),
-                new ApplicationUser(
-                        "Boris",
-                        passwordEncoder.encode("password"),
-                        SCRUM_MASTER.getAuthorities(),
-                        true,
-                        true,
-                        true,
-                        true
-                )
-        );
-    }
 
+        List<UserEntity> userEntities = userService.findAll();
+
+        List<ApplicationUser> applicationUsers = userEntities
+                .stream()
+                .map(x -> new ApplicationUser(
+                        x.getUsername(),
+                        passwordEncoder.encode(x.getPassword()),
+                        ApplicationUserRole.valueOf(x.getRole()).getAuthorities(),
+                        true,
+                        true,
+                        true,
+                        true
+                ))
+                .collect(Collectors.toList());
+
+        return applicationUsers;
+    }
 }
