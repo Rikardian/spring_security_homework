@@ -1,16 +1,23 @@
 package ru.ibs.security.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import ru.ibs.security.entities.UserEntity;
 import ru.ibs.security.model.Employee;
 import ru.ibs.security.model.Task;
+import ru.ibs.security.service.UserService;
 
 import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@RequestMapping("/manager/api")
+@RequestMapping(value = "/manager/api", consumes = {MediaType.ALL_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
 public class ManagerController {
+
+    @Autowired
+    UserService userService;
 
     private static final List<Employee> EMPLOYEES = Arrays.asList(
             new Employee(1, "Mr. Smith"),
@@ -55,5 +62,11 @@ public class ManagerController {
     @PostMapping("/task/{id}")
     public void createTask(@PathVariable("id") String taskId, @RequestBody Task task) {
         System.out.println("Created new task" + task);
+    }
+
+    @PreAuthorize("hasRole('MANAGER')")
+    @PostMapping(value = "/register", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public void registerNewEmployee(@RequestBody UserEntity userEntity){
+        userService.createUser(userEntity.getUsername(), userEntity.getPassword(), userEntity.getRole());
     }
 }
